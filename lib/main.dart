@@ -29,9 +29,96 @@ class _ArtisanAIState extends State<ArtisanAI> {
       title: 'Artisan AI',
       theme: ThemeData(
         useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFFF9F5EF),
+        scaffoldBackgroundColor: const Color(0xFFF7F4EC),
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF7A4E2D),
+          seedColor: const Color(0xFF283D63),
+          primary: const Color(0xFF283D63),
+          secondary: const Color(0xFFB85C38),
+          surface: const Color(0xFFFFFDF8),
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFFF7F4EC),
+          foregroundColor: Color(0xFF1B2438),
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          centerTitle: false,
+          titleTextStyle: TextStyle(
+            color: Color(0xFF1B2438),
+            fontSize: 21,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        cardTheme: const CardThemeData(
+          color: Color(0xFFFFFDF8),
+          elevation: 0,
+          margin: EdgeInsets.zero,
+          surfaceTintColor: Colors.transparent,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFFFFFDF8),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 17, vertical: 16),
+          labelStyle: const TextStyle(color: Color(0xFF667085)),
+          hintStyle: const TextStyle(color: Color(0xFF98A2B3)),
+          prefixIconColor: const Color(0xFF283D63),
+          suffixIconColor: const Color(0xFF667085),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(16)),
+            borderSide: BorderSide(color: Color(0xFFE3DED4)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(16)),
+            borderSide: BorderSide(color: Color(0xFFE3DED4)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(16)),
+            borderSide: BorderSide(color: Color(0xFF283D63), width: 1.5),
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF283D63),
+            foregroundColor: Colors.white,
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+            textStyle: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: const Color(0xFF283D63),
+            side: const BorderSide(color: Color(0xFFCBD3DF)),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+            textStyle: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: const Color(0xFFB85C38),
+            textStyle: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ),
+        navigationBarTheme: const NavigationBarThemeData(
+          backgroundColor: Color(0xFFFFFDF8),
+          indicatorColor: Color(0xFFE8E1D4),
+          elevation: 8,
+          height: 72,
+          labelTextStyle: MaterialStatePropertyAll(
+            TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+          ),
+        ),
+        snackBarTheme: const SnackBarThemeData(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Color(0xFF1B2438),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(14)),
+          ),
         ),
       ),
       home: WelcomeScreen(
@@ -336,7 +423,7 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F5EF),
+      backgroundColor: const Color(0xFFF7F4EC),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -352,26 +439,15 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 28),
-                Container(
-                  width: 78,
-                  height: 78,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF7A4E2D),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: const Icon(
-                    Icons.auto_awesome,
-                    color: Colors.white,
-                    size: 38,
-                  ),
-                ),
+                // People-in-Harmony logo — blue is kept as the site's existing primary color.
+                const HarmonyLogo(size: 155),
                 const SizedBox(height: 25),
                 const Text(
                   'Artisan AI',
                   style: TextStyle(
                     fontSize: 42,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFF3E281B),
+                    color: Color(0xFF1B2438),
                   ),
                 ),
                 const SizedBox(height: 5),
@@ -380,7 +456,7 @@ class WelcomeScreen extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF9A6B43),
+                    color: Color(0xFFB85C38),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -389,7 +465,7 @@ class WelcomeScreen extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(25),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE8D4BC),
+                    color: const Color(0xFFE6D5C3),
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: Column(
@@ -398,7 +474,7 @@ class WelcomeScreen extends StatelessWidget {
                       const Icon(
                         Icons.handshake_outlined,
                         size: 42,
-                        color: Color(0xFF6D4327),
+                        color: Color(0xFF1F3152),
                       ),
                       const SizedBox(height: 20),
                       Text(
@@ -407,7 +483,7 @@ class WelcomeScreen extends StatelessWidget {
                           fontSize: 29,
                           height: 1.15,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFF3E281B),
+                          color: Color(0xFF1B2438),
                         ),
                       ),
                       const SizedBox(height: 14),
@@ -439,7 +515,7 @@ class WelcomeScreen extends StatelessWidget {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF7A4E2D),
+                      backgroundColor: const Color(0xFF283D63),
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
@@ -486,7 +562,7 @@ class RoleScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F5EF),
+      backgroundColor: const Color(0xFFF7F4EC),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -515,7 +591,7 @@ class RoleScreen extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 29,
                 fontWeight: FontWeight.w800,
-                color: Color(0xFF3E281B),
+                color: Color(0xFF1B2438),
               ),
             ),
             const SizedBox(height: 35),
@@ -589,13 +665,13 @@ class RoleCard extends StatelessWidget {
                 width: 65,
                 height: 65,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF0E2D3),
+                  color: const Color(0xFFE8E1D4),
                   borderRadius: BorderRadius.circular(19),
                 ),
                 child: Icon(
                   icon,
                   size: 32,
-                  color: const Color(0xFF7A4E2D),
+                  color: const Color(0xFF283D63),
                 ),
               ),
               const SizedBox(width: 18),
@@ -608,7 +684,7 @@ class RoleCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF3E281B),
+                        color: Color(0xFF1B2438),
                       ),
                     ),
                     const SizedBox(height: 7),
@@ -658,7 +734,7 @@ class _ArtisanDashboardState extends State<ArtisanDashboard> {
     final l = widget.language;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F5EF),
+      backgroundColor: const Color(0xFFF7F4EC),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -666,7 +742,7 @@ class _ArtisanDashboardState extends State<ArtisanDashboard> {
           'Artisan AI',
           style: TextStyle(
             fontWeight: FontWeight.w800,
-            color: Color(0xFF3E281B),
+            color: Color(0xFF1B2438),
           ),
         ),
         actions: [
@@ -699,7 +775,7 @@ class _ArtisanDashboardState extends State<ArtisanDashboard> {
               style: const TextStyle(
                 fontSize: 29,
                 fontWeight: FontWeight.w800,
-                color: Color(0xFF3E281B),
+                color: Color(0xFF1B2438),
               ),
             ),
             const SizedBox(height: 22),
@@ -709,8 +785,8 @@ class _ArtisanDashboardState extends State<ArtisanDashboard> {
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [
-                    Color(0xFF7A4E2D),
-                    Color(0xFF9B6944),
+                    Color(0xFF283D63),
+                    Color(0xFF3C5278),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(26),
@@ -767,7 +843,7 @@ class _ArtisanDashboardState extends State<ArtisanDashboard> {
               },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
-                      foregroundColor: const Color(0xFF7A4E2D),
+                      foregroundColor: const Color(0xFF283D63),
                       elevation: 0,
                     ),
                     child: Text(
@@ -784,7 +860,7 @@ class _ArtisanDashboardState extends State<ArtisanDashboard> {
               style: const TextStyle(
                 fontSize: 21,
                 fontWeight: FontWeight.w800,
-                color: Color(0xFF3E281B),
+                color: Color(0xFF1B2438),
               ),
             ),
             const SizedBox(height: 15),
@@ -822,7 +898,7 @@ class _ArtisanDashboardState extends State<ArtisanDashboard> {
               style: const TextStyle(
                 fontSize: 21,
                 fontWeight: FontWeight.w800,
-                color: Color(0xFF3E281B),
+                color: Color(0xFF1B2438),
               ),
             ),
             const SizedBox(height: 15),
@@ -917,12 +993,12 @@ class SmallFeatureCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF0E2D3),
+                  color: const Color(0xFFE8E1D4),
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Icon(
                   icon,
-                  color: const Color(0xFF7A4E2D),
+                  color: const Color(0xFF283D63),
                 ),
               ),
               const SizedBox(height: 14),
@@ -977,7 +1053,7 @@ class OverviewCard extends StatelessWidget {
           Icon(
             icon,
             size: 22,
-            color: const Color(0xFF9A6B43),
+            color: const Color(0xFFB85C38),
           ),
           const SizedBox(height: 8),
           Text(
@@ -1016,7 +1092,7 @@ class BuyerDashboard extends StatelessWidget {
     final l = language;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F5EF),
+      backgroundColor: const Color(0xFFF7F4EC),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -1024,7 +1100,7 @@ class BuyerDashboard extends StatelessWidget {
           'Artisan AI',
           style: TextStyle(
             fontWeight: FontWeight.w800,
-            color: Color(0xFF3E281B),
+            color: Color(0xFF1B2438),
           ),
         ),
         actions: [
@@ -1054,7 +1130,7 @@ class BuyerDashboard extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 27,
                 fontWeight: FontWeight.w800,
-                color: Color(0xFF3E281B),
+                color: Color(0xFF1B2438),
               ),
             ),
             const SizedBox(height: 20),
@@ -1107,13 +1183,13 @@ class BuyerDashboard extends StatelessWidget {
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE8D4BC),
+                      color: const Color(0xFFE6D5C3),
                       borderRadius: BorderRadius.circular(17),
                     ),
                     child: const Icon(
                       Icons.checkroom,
                       size: 45,
-                      color: Color(0xFF7A4E2D),
+                      color: Color(0xFF283D63),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -1142,7 +1218,7 @@ class BuyerDashboard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 19,
                             fontWeight: FontWeight.w800,
-                            color: Color(0xFF7A4E2D),
+                            color: Color(0xFF283D63),
                           ),
                         ),
                       ],
@@ -1183,7 +1259,7 @@ class CategoryCard extends StatelessWidget {
             Icon(
               icon,
               size: 27,
-              color: const Color(0xFF7A4E2D),
+              color: const Color(0xFF283D63),
             ),
             const SizedBox(height: 8),
             Text(
@@ -1421,7 +1497,7 @@ Return ONLY valid JSON:
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF7A4E2D),
+                  color: Color(0xFF283D63),
                 ),
               ),
 
@@ -1463,7 +1539,7 @@ Return ONLY valid JSON:
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor:
-                    const Color(0xFF7A4E2D),
+                    const Color(0xFF283D63),
                 foregroundColor: Colors.white,
               ),
               child: const Text(
@@ -1559,7 +1635,7 @@ void _askArtisanPrice() {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor:
-                  const Color(0xFF7A4E2D),
+                  const Color(0xFF283D63),
               foregroundColor: Colors.white,
             ),
             child: const Text('Use My Price'),
@@ -1581,11 +1657,11 @@ void _askArtisanPrice() {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F3ED),
+      backgroundColor: const Color(0xFFF7F4EC),
       appBar: AppBar(
         title: const Text('Pricing Recommendation'),
-        backgroundColor: const Color(0xFFF8F3ED),
-        foregroundColor: const Color(0xFF3E281B),
+        backgroundColor: const Color(0xFFF7F4EC),
+        foregroundColor: const Color(0xFF1B2438),
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -1598,7 +1674,7 @@ void _askArtisanPrice() {
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.w800,
-                color: Color(0xFF3E281B),
+                color: Color(0xFF1B2438),
               ),
             ),
 
@@ -1640,7 +1716,7 @@ DropdownButtonFormField<double>(
     labelText: 'Time Taken',
     prefixIcon: const Icon(
       Icons.access_time,
-      color: Color(0xFF7A4E2D),
+      color: Color(0xFF283D63),
     ),
     filled: true,
     fillColor: Colors.white,
@@ -1722,7 +1798,7 @@ _priceInput(
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF7A4E2D),
+                  backgroundColor: const Color(0xFF283D63),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
                     vertical: 16,
@@ -1758,7 +1834,7 @@ _priceInput(
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF7A4E2D),
+                        color: Color(0xFF283D63),
                       ),
                     ),
 
@@ -1769,7 +1845,7 @@ _priceInput(
                       style: const TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.w800,
-                        color: Color(0xFF3E281B),
+                        color: Color(0xFF1B2438),
                       ),
                     ),
 
@@ -1819,7 +1895,7 @@ _priceInput(
         hintText: hint,
         prefixIcon: Icon(
           icon,
-          color: const Color(0xFF7A4E2D),
+          color: const Color(0xFF283D63),
         ),
         filled: true,
         fillColor: Colors.white,
@@ -1884,7 +1960,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
         labelText: label,
         hintText: hint,
         filled: true,
-        fillColor: const Color(0xFFF9F5EF),
+        fillColor: const Color(0xFFF7F4EC),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -2174,7 +2250,7 @@ ${result['description']}
                       children: [
                         Icon(
                           Icons.auto_awesome,
-                          color: Color(0xFF7A4E2D),
+                          color: Color(0xFF283D63),
                         ),
                         SizedBox(width: 10),
                         Text(
@@ -2194,7 +2270,7 @@ ${result['description']}
                       children: [
                         const Icon(
                           Icons.language,
-                          color: Color(0xFF7A4E2D),
+                          color: Color(0xFF283D63),
                         ),
                         const SizedBox(width: 8),
                         const Text(
@@ -2292,7 +2368,7 @@ ${result['description']}
                         icon: const Icon(Icons.check),
                         label: const Text('Confirm Listing'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF7A4E2D),
+                          backgroundColor: const Color(0xFF283D63),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(
                             vertical: 16,
@@ -2332,7 +2408,7 @@ ${result['description']}
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF7A4E2D),
+            color: Color(0xFF283D63),
           ),
         ),
 
@@ -2343,7 +2419,7 @@ ${result['description']}
           maxLines: maxLines,
           decoration: InputDecoration(
             filled: true,
-            fillColor: const Color(0xFFF9F5EF),
+            fillColor: const Color(0xFFF7F4EC),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -2358,7 +2434,7 @@ ${result['description']}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FC),
+      backgroundColor: const Color(0xFFF4F6FA),
 
       appBar: AppBar(
         title: const Text(
@@ -2487,7 +2563,7 @@ ${result['description']}
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF7A4E2D),
+                        color: Color(0xFF283D63),
                       ),
                     ),
 
@@ -2615,3 +2691,137 @@ ${result['description']}
     );
   }
 }
+
+
+class HarmonyLogo extends StatelessWidget {
+  final double size;
+
+  const HarmonyLogo({
+    super.key,
+    this.size = 155,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size * 0.78,
+      child: CustomPaint(
+        painter: _HarmonyLogoPainter(),
+      ),
+    );
+  }
+}
+
+class _HarmonyLogoPainter extends CustomPainter {
+  // Keep the exact blue used throughout the current website.
+  static const blue = Color(0xFF283D63);
+  static const terracotta = Color(0xFFC96B3C);
+  static const leaf = Color(0xFF5C806F);
+  static const accent = Color(0xFFC96B3C);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final sx = size.width / 155;
+    final sy = size.height / 121;
+    canvas.save();
+    canvas.scale(sx, sy);
+
+    final fill = Paint()..style = PaintingStyle.fill;
+
+    // Left person's head.
+    fill.color = terracotta;
+    canvas.drawCircle(const Offset(35, 22), 13, fill);
+
+    // Right person's head — same blue as the website.
+    fill.color = blue;
+    canvas.drawCircle(const Offset(120, 22), 13, fill);
+
+    // Left person / artisan.
+    fill.color = terracotta;
+    final left = Path()
+      ..moveTo(25, 39)
+      ..cubicTo(8, 43, 7, 61, 15, 76)
+      ..cubicTo(23, 91, 43, 99, 60, 94)
+      ..cubicTo(69, 91, 79, 84, 89, 76)
+      ..lineTo(80, 65)
+      ..cubicTo(69, 73, 61, 82, 51, 84)
+      ..cubicTo(40, 86, 31, 81, 26, 73)
+      ..cubicTo(21, 65, 25, 56, 34, 52)
+      ..cubicTo(39, 50, 44, 51, 48, 55)
+      ..lineTo(65, 72)
+      ..lineTo(76, 62)
+      ..lineTo(56, 43)
+      ..cubicTo(48, 35, 36, 35, 25, 39)
+      ..close();
+    canvas.drawPath(left, fill);
+
+    // Right person / buyer — same blue as the site's primary buttons and icon.
+    fill.color = blue;
+    final right = Path()
+      ..moveTo(130, 39)
+      ..cubicTo(147, 43, 148, 61, 140, 76)
+      ..cubicTo(132, 91, 112, 99, 95, 94)
+      ..cubicTo(86, 91, 76, 84, 66, 76)
+      ..lineTo(75, 65)
+      ..cubicTo(86, 73, 94, 82, 104, 84)
+      ..cubicTo(115, 86, 124, 81, 129, 73)
+      ..cubicTo(134, 65, 130, 56, 121, 52)
+      ..cubicTo(116, 50, 111, 51, 107, 55)
+      ..lineTo(90, 72)
+      ..lineTo(79, 62)
+      ..lineTo(99, 43)
+      ..cubicTo(107, 35, 119, 35, 130, 39)
+      ..close();
+    canvas.drawPath(right, fill);
+
+    // Shared-growth sprout in the centre.
+    fill.color = leaf;
+
+    final stem = Paint()
+      ..color = leaf
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    canvas.drawLine(
+      const Offset(77.5, 75),
+      const Offset(77.5, 57),
+      stem,
+    );
+
+    final leftLeaf = Path()
+      ..moveTo(76, 61)
+      ..cubicTo(67, 57, 64, 51, 64, 45)
+      ..cubicTo(72, 46, 77, 51, 77, 58)
+      ..close();
+    canvas.drawPath(leftLeaf, fill);
+
+    final rightLeaf = Path()
+      ..moveTo(79, 61)
+      ..cubicTo(88, 57, 91, 51, 91, 45)
+      ..cubicTo(83, 46, 78, 51, 78, 58)
+      ..close();
+    canvas.drawPath(rightLeaf, fill);
+
+    // Small sparkle = AI, using the same warm accent as the left figure.
+    fill.color = accent;
+    final sparkle = Path()
+      ..moveTo(77.5, 4)
+      ..lineTo(80.5, 11)
+      ..lineTo(88, 14)
+      ..lineTo(80.5, 17)
+      ..lineTo(77.5, 24)
+      ..lineTo(74.5, 17)
+      ..lineTo(67, 14)
+      ..lineTo(74.5, 11)
+      ..close();
+    canvas.drawPath(sparkle, fill);
+
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
