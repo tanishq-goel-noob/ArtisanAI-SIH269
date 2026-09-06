@@ -795,7 +795,14 @@ class _ArtisanDashboardState extends State<ArtisanDashboard> {
                     icon: Icons.currency_rupee_rounded,
                     title: tr(l, 'pricing'),
                     subtitle: tr(l, 'pricingSub'),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const PricingScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(width: 13),
@@ -1193,6 +1200,637 @@ class CategoryCard extends StatelessWidget {
     );
   }
 }
+class PricingScreen extends StatefulWidget {
+  const PricingScreen({super.key});
+
+  @override
+  State<PricingScreen> createState() => _PricingScreenState();
+}
+
+class _PricingScreenState extends State<PricingScreen> {
+  final materialController = TextEditingController();
+  final labourController = TextEditingController();
+  final timeController = TextEditingController();
+  final quantityController = TextEditingController();
+  
+
+
+  double? totalCost;
+  double? minPrice;
+  double? maxPrice;
+
+Future<void> calculatePrice() async {
+  final materialCost =
+      double.tryParse(materialController.text) ?? 0;
+
+  final labourCost =
+      double.tryParse(labourController.text) ?? 0;
+
+  final timeTaken =
+      double.tryParse(timeController.text) ?? 0;
+
+  if (materialCost <= 0 ||
+      labourCost <= 0 ||
+      timeTaken <= 0) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Please enter valid material, labour cost and time.',
+        ),
+      ),
+    );
+    return;
+  }
+
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) {
+      return const AlertDialog(
+        content: Row(
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(width: 20),
+            Expanded(
+              child: Text(
+                'AI is finding a fair price...',
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+
+  try {
+    const apiKey =
+        String.fromEnvironment('GEMINI_API_KEY');
+
+    final models = [
+      'gemini-3.8-flash',
+      'gemini-3.7-flash',
+      'gemini-3.6-flash',
+      'gemini-3.5-flash',
+    ];
+
+    http.Response? successfulResponse;
+
+    for (final model in models) {
+      try {
+        final response = await http.post(
+          Uri.parse(
+            'https://generativelanguage.googleapis.com/v1beta/models/'
+            '$model:generateContent',
+          ),
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey,
+          },
+          body: jsonEncode({
+            'contents': [
+              {
+                'parts': [
+                  {
+                    'text': '''
+You are an AI pricing assistant for marginalized artisans.
+
+Calculate a fair selling price using:
+
+Material Cost: ₹$materialCost
+Labour Cost: ₹$labourCost
+Time Taken: $timeTaken hours
+
+Rules:
+- Consider material cost.
+- Consider labour cost.
+- Consider the time and effort of the artisan.
+- Recommend a reasonable profit.
+- Do not give an extremely high or unrealistic price.
+- Give a price RANGE, not one exact price.
+- Do not invent market data.
+- Use simple English.
+
+Return ONLY valid JSON:
+
+{
+  "minimumPrice": 900,
+  "maximumPrice": 1100,
+  "reason": "This price covers your costs and gives a reasonable profit for your time and effort."
+}
+'''
+                  }
+                ]
+              }
+            ]
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          successfulResponse = response;
+          break;
+        }
+
+        // Try next model for temporary/server errors.
+        if (![429, 500, 502, 503, 504]
+            .contains(response.statusCode)) {
+          throw Exception(
+            'Gemini API error: ${response.statusCode}',
+          );
+        }
+      } catch (e) {
+        // Try the next model.
+        continue;
+      }
+    }
+
+    // Close loading dialog
+    if (context.mounted) {
+      Navigator.pop(context);
+    }
+
+    if (successfulResponse == null) {
+      throw Exception(
+        'All AI pricing models are currently unavailable. '
+        'Please try again.',
+      );
+    }
+
+    final data = jsonDecode(successfulResponse.body);
+
+    String aiText =
+        data['candidates'][0]['content']['parts'][0]['text'];
+
+    aiText = aiText.trim();
+
+    // Remove ```json ... ``` if Gemini adds it.
+    if (aiText.startsWith('```')) {
+      aiText = aiText
+          .replaceFirst(
+            RegExp(r'^```json\s*'),
+            '',
+          )
+          .replaceFirst(
+            RegExp(r'^```\s*'),
+            '',
+          )
+          .replaceFirst(
+            RegExp(r'\s*```$'),
+            '',
+          );
+    }
+
+    final aiResult = jsonDecode(aiText);
+
+    final aiMinimum =
+        (aiResult['minimumPrice'] as num).toDouble();
+
+    final aiMaximum =
+        (aiResult['maximumPrice'] as num).toDouble();
+
+    final reason =
+        aiResult['reason'] ??
+        'This price provides a reasonable return for your work.';
+
+    if (!context.mounted) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text(
+            'AI Price Recommendation 🤖',
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Recommended Selling Price:',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 8),
+
+              Text(
+                '₹${aiMinimum.toStringAsFixed(0)} – '
+                '₹${aiMaximum.toStringAsFixed(0)}',
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF7A4E2D),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              Text(reason),
+
+              const SizedBox(height: 20),
+
+              const Text(
+                'Are you satisfied with this price?',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                _askArtisanPrice();
+              },
+              child: const Text(
+                'No, I want to set my price',
+              ),
+            ),
+
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+
+                setState(() {
+                  totalCost =
+                      materialCost + labourCost;
+                  minPrice = aiMinimum;
+                  maxPrice = aiMaximum;
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    const Color(0xFF7A4E2D),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text(
+                'Yes, I am satisfied',
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  } catch (e) {
+    if (context.mounted) {
+      Navigator.pop(context);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'AI pricing error: $e',
+          ),
+        ),
+      );
+    }
+  }
+}
+
+void _askArtisanPrice() {
+  final customPriceController = TextEditingController();
+
+  showDialog(
+    context: context,
+    builder: (dialogContext) {
+      return AlertDialog(
+        title: const Text(
+          'Enter Your Price',
+        ),
+        content: TextField(
+          controller: customPriceController,
+          keyboardType: const TextInputType.numberWithOptions(
+            decimal: true,
+          ),
+          decoration: const InputDecoration(
+            labelText: 'Your Selling Price',
+            prefixText: '₹ ',
+            hintText: 'Example: 1200',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+            },
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final price = double.tryParse(
+                customPriceController.text,
+              );
+
+              if (price == null || price <= 0) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Please enter a valid price.',
+                    ),
+                  ),
+                );
+                return;
+              }
+
+              Navigator.pop(dialogContext);
+
+              final materialCost =
+                  double.tryParse(
+                        materialController.text,
+                      ) ??
+                      0;
+
+              final labourCost =
+                  double.tryParse(
+                        labourController.text,
+                      ) ??
+                      0;
+
+              setState(() {
+                totalCost =
+                    materialCost + labourCost;
+
+                // Artisan's own price becomes final price
+                minPrice = price;
+                maxPrice = price;
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
+                  const Color(0xFF7A4E2D),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Use My Price'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+  @override
+  void dispose() {
+    materialController.dispose();
+    labourController.dispose();
+    timeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F3ED),
+      appBar: AppBar(
+        title: const Text('Pricing Recommendation'),
+        backgroundColor: const Color(0xFFF8F3ED),
+        foregroundColor: const Color(0xFF3E281B),
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Find a Fair Price 💰',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF3E281B),
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            const Text(
+              'Enter your production costs and get a suggested selling price.',
+              style: TextStyle(
+                fontSize: 15,
+                color: Colors.black54,
+              ),
+            ),
+
+            const SizedBox(height: 28),
+
+            _priceInput(
+              controller: materialController,
+              label: 'Material Cost',
+              hint: 'Example: ₹200',
+              icon: Icons.inventory_2_outlined,
+            ),
+
+            const SizedBox(height: 16),
+
+            _priceInput(
+              controller: labourController,
+              label: 'Labour Cost',
+              hint: 'Example: ₹150',
+              icon: Icons.person_outline,
+            ),
+
+            const SizedBox(height: 16),
+
+DropdownButtonFormField<double>(
+  value: timeController.text.isEmpty
+      ? null
+      : double.tryParse(timeController.text),
+  decoration: InputDecoration(
+    labelText: 'Time Taken',
+    prefixIcon: const Icon(
+      Icons.access_time,
+      color: Color(0xFF7A4E2D),
+    ),
+    filled: true,
+    fillColor: Colors.white,
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: BorderSide.none,
+    ),
+  ),
+  items: const [
+    DropdownMenuItem(
+      value: 0.5,
+      child: Text('30 minutes'),
+    ),
+    DropdownMenuItem(
+      value: 1,
+      child: Text('1 hour'),
+    ),
+    DropdownMenuItem(
+      value: 2,
+      child: Text('2 hours'),
+    ),
+    DropdownMenuItem(
+      value: 3,
+      child: Text('3 hours'),
+    ),
+    DropdownMenuItem(
+      value: 4,
+      child: Text('4 hours'),
+    ),
+    DropdownMenuItem(
+      value: 5,
+      child: Text('5 hours'),
+    ),
+    DropdownMenuItem(
+      value: 6,
+      child: Text('6 hours'),
+    ),
+    DropdownMenuItem(
+      value: 8,
+      child: Text('8 hours'),
+    ),
+    DropdownMenuItem(
+      value: 10,
+      child: Text('10 hours'),
+    ),
+    DropdownMenuItem(
+      value: 12,
+      child: Text('12 hours'),
+    ),
+  ],
+  onChanged: (value) {
+    if (value != null) {
+      timeController.text = value.toString();
+    }
+  },
+),
+
+const SizedBox(height: 16),
+
+_priceInput(
+  controller: quantityController,
+  label: 'Quantity',
+  hint: 'Example: 5 pieces',
+  icon: Icons.inventory_2_outlined,
+),
+
+            const SizedBox(height: 28),
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: calculatePrice,
+                icon: const Icon(Icons.calculate_outlined),
+                label: const Text(
+                  'Calculate Fair Price',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF7A4E2D),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+            ),
+
+            if (totalCost != null) ...[
+              const SizedBox(height: 30),
+
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(22),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: const [
+                    BoxShadow(
+                      blurRadius: 10,
+                      color: Colors.black12,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Recommended Price',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF7A4E2D),
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    Text(
+                      '₹${minPrice!.toStringAsFixed(0)} – ₹${maxPrice!.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF3E281B),
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    Text(
+                      'Production Cost: ₹${totalCost!.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        color: Colors.black54,
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    const Text(
+                      'This range covers your production cost and provides a reasonable profit margin.',
+                      style: TextStyle(
+                        fontSize: 14,
+                        height: 1.4,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _priceInput({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData icon,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: const TextInputType.numberWithOptions(
+        decimal: true,
+      ),
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        prefixIcon: Icon(
+          icon,
+          color: const Color(0xFF7A4E2D),
+        ),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
+  }
+}
 class AddProductScreen extends StatefulWidget {
   const AddProductScreen({super.key});
 
@@ -1202,9 +1840,20 @@ class AddProductScreen extends StatefulWidget {
 
 class _AddProductScreenState extends State<AddProductScreen> {
   final ImagePicker _picker = ImagePicker();
+  final Map<String, String> artisanMemory = {};
 
   Uint8List? _selectedImage;
+  final productNameController = TextEditingController();
+  final categoryController = TextEditingController();
+  final materialController = TextEditingController();
+  final tagsController = TextEditingController();
+  final descriptionController = TextEditingController();
+  final colorController = TextEditingController();
+  final craftController = TextEditingController();
+  final storyController = TextEditingController();
   bool _isUploading = false;
+  bool _listingConfirmed = false;
+  String _confirmedDescription = '';
 
   Future<void> _pickImage() async {
     final XFile? image = await _picker.pickImage(
@@ -1218,7 +1867,32 @@ class _AddProductScreenState extends State<AddProductScreen> {
     setState(() {
       _selectedImage = bytes;
     });
+    
   }
+  Widget _inputField({
+  required TextEditingController controller,
+  required String label,
+  required String hint,
+  int maxLines = 1,
+}) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 14),
+    child: TextField(
+      controller: controller,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        filled: true,
+        fillColor: const Color(0xFFF9F5EF),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    ),
+  );
+}
 
 Future<void> _generateListing() async {
   if (_selectedImage == null) {
@@ -1243,21 +1917,35 @@ Future<void> _generateListing() async {
 
     final base64Image = base64Encode(_selectedImage!);
 
-    final response = await http.post(
-      Uri.parse(
-        'https://generativelanguage.googleapis.com/v1beta/models/'
-        'gemini-3.8-flash:generateContent',
-      ),
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': apiKey,
-      },
-      body: jsonEncode({
-        'contents': [
-          {
-            'parts': [
-              {
-                'text': '''
+    // Automatic fallback models
+    final models = [
+      'gemini-3.8-flash',
+      'gemini-3.6-flash',
+      'gemini-3.5-flash',
+      'gemini-2.5-flash',
+    ];
+
+    http.Response? successfulResponse;
+    String? lastError;
+
+    for (final model in models) {
+      try {
+        final response = await http
+            .post(
+              Uri.parse(
+                'https://generativelanguage.googleapis.com/v1beta/models/'
+                '$model:generateContent',
+              ),
+              headers: {
+                'Content-Type': 'application/json',
+                'x-goog-api-key': apiKey,
+              },
+              body: jsonEncode({
+                'contents': [
+                  {
+                    'parts': [
+                      {
+                        'text': '''
 You are an AI assistant for Indian artisans.
 
 Analyze this handmade product image and create a marketplace-ready product listing.
@@ -1273,40 +1961,55 @@ Return ONLY valid JSON in this exact format:
 }
 
 Important:
-- Do not claim a material with certainty if it cannot be identified from the image.
-- For uncertain materials, use wording like "Possible material: ...".
 - Use very simple and easy English.
-- Write the description so that a normal buyer can understand it easily.
-- Avoid difficult, fancy, technical, or uncommon English words.
+- Write the description so a normal buyer can understand it easily.
 - Use short and clear sentences.
 - Keep the description natural and friendly.
-- Do not use words like "exquisite", "intricate", "artisan craftsmanship", "earthenware", "rustic", "sophisticated", or other difficult words.
-- Prefer common words like "beautiful", "handmade", "clay", "strong", "useful", "simple", and "traditional".
+- Avoid difficult, fancy, technical, or uncommon English words.
 - Keep the description around 2-4 short sentences.
+- Do not claim a material with certainty if it cannot be identified from the image.
+- For uncertain materials, use wording like "Possible material: ...".
 - Focus on handmade/artisan context.
 - Do not invent a specific region or craft tradition unless visually supported.
 ''',
-              },
-              {
-                'inline_data': {
-                  'mime_type': 'image/jpeg',
-                  'data': base64Image,
-                },
-              },
-            ],
-          },
-        ],
-      }),
-    );
+                      },
+                      {
+                        'inline_data': {
+                          'mime_type': 'image/jpeg',
+                          'data': base64Image,
+                        },
+                      },
+                    ],
+                  },
+                ],
+              }),
+            )
+            .timeout(const Duration(seconds: 20));
 
-    if (response.statusCode != 200) {
+        if (response.statusCode == 200) {
+          successfulResponse = response;
+          break;
+        }
+
+        lastError = '$model returned ${response.statusCode}';
+
+        // Small delay before trying the next model
+        await Future.delayed(const Duration(seconds: 1));
+      } catch (e) {
+        lastError = '$model failed: $e';
+
+        // Try the next model automatically
+        await Future.delayed(const Duration(seconds: 1));
+      }
+    }
+
+    if (successfulResponse == null) {
       throw Exception(
-        'Gemini API error: ${response.statusCode}\n${response.body}',
+        'All AI models are temporarily unavailable. Last error: $lastError',
       );
     }
 
-    final data = jsonDecode(response.body);
-
+    final data = jsonDecode(successfulResponse.body);
     final text = data['candidates'][0]['content']['parts'][0]['text'];
 
     setState(() {
@@ -1328,142 +2031,329 @@ Important:
   }
 }
 
-  void _showAIResult(String text) {
-    try {
-      String cleanText = text.trim();
+void _showAIResult(String text) {
+  try {
+    String cleanText = text.trim();
 
-      if (cleanText.startsWith('```')) {
-        cleanText = cleanText
-            .replaceFirst(RegExp(r'^```json\s*'), '')
-            .replaceFirst(RegExp(r'^```\s*'), '')
-            .replaceFirst(RegExp(r'\s*```$'), '');
-      }
+    if (cleanText.startsWith('```')) {
+      cleanText = cleanText
+          .replaceFirst(RegExp(r'^```json\s*'), '')
+          .replaceFirst(RegExp(r'^```\s*'), '')
+          .replaceFirst(RegExp(r'\s*```$'), '');
+    }
 
-      final result = jsonDecode(cleanText);
+final result = jsonDecode(cleanText);
 
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (context) {
-          return Container(
-            padding: const EdgeInsets.all(24),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(
-                top: Radius.circular(28),
+// Load AI-generated values into editable fields
+productNameController.text =
+    result['productName'] ?? '';
+
+materialController.text =
+    (result['materials'] as List?)?.join(', ') ?? '';
+
+colorController.text =
+    result['colour'] ?? '';
+
+craftController.text =
+    result['craftTechnique'] ?? '';
+
+storyController.text =
+    result['description'] ?? '';
+
+String selectedLanguage = 'English';
+
+descriptionController.text =
+    result['description'] ?? '';
+categoryController.text =
+    result['category'] ?? '';
+materialController.text =
+    (result['materials'] as List?)?.join(', ') ?? '';
+
+String currentDescription =
+    result['description'] ?? 'No description generated';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            Future<void> translateDescription(String language) async {
+              if (language == 'English') {
+                setModalState(() {
+                  currentDescription =
+                      result['description'] ?? 'No description generated';
+                });
+                return;
+              }
+
+              setModalState(() {
+                currentDescription = 'Translating...';
+              });
+
+              try {
+                const apiKey =
+                    String.fromEnvironment('GEMINI_API_KEY');
+
+                final response = await http.post(
+                  Uri.parse(
+                    'https://generativelanguage.googleapis.com/v1beta/models/'
+                    'gemini-2.5-flash:generateContent',
+                  ),
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'x-goog-api-key': apiKey,
+                  },
+                  body: jsonEncode({
+                    'contents': [
+                      {
+                        'parts': [
+                          {
+                            'text': '''
+Translate the following product description into $language.
+
+Rules:
+- Keep the meaning exactly the same.
+- Use simple and natural language.
+- Do not add new information.
+- Do not remove important information.
+- Keep it suitable for a product listing.
+
+Description:
+${result['description']}
+'''
+                          }
+                        ]
+                      }
+                    ]
+                  }),
+                );
+
+                if (response.statusCode != 200) {
+                  throw Exception(
+                    'Translation failed: ${response.statusCode}',
+                  );
+                }
+
+                final data = jsonDecode(response.body);
+
+                final translatedText =
+                    data['candidates'][0]['content']['parts'][0]['text'];
+
+                setModalState(() {
+                  currentDescription = translatedText.trim();
+                });
+              } catch (e) {
+                setModalState(() {
+                  currentDescription =
+                      result['description'] ?? 'Translation failed';
+                });
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Translation error: $e'),
+                  ),
+                );
+              }
+            }
+
+            return Container(
+              padding: const EdgeInsets.all(24),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(28),
+                ),
               ),
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Row(
-                    children: [
-                      Icon(
-                        Icons.auto_awesome,
-                        color: Color(0xFF7A4E2D),
-                      ),
-                      SizedBox(width: 10),
-                      Text(
-                        'AI Generated Listing',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(
+                          Icons.auto_awesome,
+                          color: Color(0xFF7A4E2D),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  _resultField(
-                    'Product Name',
-                    result['productName'] ?? 'Not identified',
-                  ),
-                  _resultField(
-                    'Category',
-                    result['category'] ?? 'Not identified',
-                  ),
-                  _resultField(
-                    'Description',
-                    result['description'] ?? 'No description generated',
-                  ),
-                  _resultField(
-                    'Materials',
-                    (result['materials'] as List?)?.join(', ') ??
-                        'Not identified',
-                  ),
-                  _resultField(
-                    'Tags',
-                    (result['tags'] as List?)?.join(', ') ??
-                        'No tags generated',
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: const Icon(Icons.check),
-                      label: const Text('Confirm Listing'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF7A4E2D),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 16,
+                        SizedBox(width: 10),
+                        Text(
+                          'AI Generated Listing',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Language selector
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.language,
+                          color: Color(0xFF7A4E2D),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Language:',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            value: selectedLanguage,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                            ),
+                            items: const [
+                              'English',
+                              'Hindi',
+                              'Tamil',
+                              'Telugu',
+                              'Malayalam',
+                              'Kannada',
+                              'Bengali',
+                              'Marathi',
+                              'Gujarati',
+                              'Punjabi',
+                              'Odia',
+                              'Assamese',
+                            ].map((language) {
+                              return DropdownMenuItem(
+                                value: language,
+                                child: Text(language),
+                              );
+                            }).toList(),
+                            onChanged: (language) {
+                              if (language == null) return;
+
+                              setModalState(() {
+                                selectedLanguage = language;
+                              });
+
+                              translateDescription(language);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    _editableResultField(
+                      title: 'Product Name',
+                      controller: productNameController,
+                    ),
+
+                    _editableResultField(
+                      title: 'Category',
+                      controller: categoryController,
+                    ),
+
+                    _editableResultField(
+                      title: 'Description',
+                      controller: descriptionController,
+                      maxLines: 4,
+                    ),
+
+                    _editableResultField(
+                      title: 'Materials',
+                      controller: materialController,
+                    ),
+
+                    _editableResultField(
+                      title: 'Tags',
+                      controller: tagsController,
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            _confirmedDescription = descriptionController.text;
+                            _listingConfirmed = true;
+                          });
+
+  Navigator.pop(sheetContext);
+},
+                        icon: const Icon(Icons.check),
+                        label: const Text('Confirm Listing'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF7A4E2D),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 16,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        },
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Could not read AI response: $e'),
-        ),
-      );
-    }
-  }
-
-  Widget _resultField(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF7A4E2D),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF9F5EF),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 15,
-                height: 1.4,
-              ),
-            ),
-          ),
-        ],
+            );
+          },
+        );
+      },
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Could not read AI response: $e'),
       ),
     );
   }
+}
+
+  Widget _editableResultField({
+  required String title,
+  required TextEditingController controller,
+  int maxLines = 1,
+}) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 18),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF7A4E2D),
+          ),
+        ),
+
+        const SizedBox(height: 6),
+
+        TextField(
+          controller: controller,
+          maxLines: maxLines,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: const Color(0xFFF9F5EF),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -1510,77 +2400,110 @@ Important:
             const SizedBox(height: 28),
 
             // PHOTO SECTION
-            GestureDetector(
-              onTap: _pickImage,
-
-              child: Container(
-                width: double.infinity,
-                height: 280,
-
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: Colors.grey.shade300,
-                    width: 1.5,
+            Center(
+              child: GestureDetector(
+                onTap: _pickImage,
+                child: Container(
+                  width: 320,
+                  height: 320,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.grey.shade300,
+                      width: 1.5,
+                    ),
                   ),
-                ),
-
-                child: _selectedImage == null
-                    ? Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-
-                          Container(
-                            padding: const EdgeInsets.all(18),
-
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
-                              shape: BoxShape.circle,
+                  child: _selectedImage == null
+                      ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(18),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.camera_alt_outlined,
+                                size: 42,
+                                color: Colors.blue,
+                              ),
                             ),
 
-                            child: const Icon(
-                              Icons.camera_alt_outlined,
-                              size: 42,
-                              color: Colors.blue,
+                            const SizedBox(height: 18),
+
+                            const Text(
+                              'Upload Product Photo',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
+
+                            const SizedBox(height: 8),
+
+                            const Text(
+                              'Tap here to choose a photo',
+                              style: TextStyle(
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        )
+                      : ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Image.memory(
+                            _selectedImage!,
+                            width: 320,
+                            height: 320,
+                            fit: BoxFit.cover,
                           ),
-
-                          const SizedBox(height: 18),
-
-                          const Text(
-                            'Upload Product Photo',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-
-                          const SizedBox(height: 8),
-
-                          const Text(
-                            'Tap here to choose a photo',
-                            style: TextStyle(
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      )
-
-                    : ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-
-                        child: Image.memory(
-                          _selectedImage!,
-                          width: double.infinity,
-                          height: double.infinity,
-                          fit: BoxFit.cover,
                         ),
-                      ),
+                ),
               ),
             ),
 
             const SizedBox(height: 20),
+
+                        if (_listingConfirmed) ...[
+              const SizedBox(height: 20),
+
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: Colors.brown.shade100,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Confirmed Product Description',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF7A4E2D),
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    Text(
+                      _confirmedDescription,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
 
             // CHANGE PHOTO BUTTON
             if (_selectedImage != null)
