@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_tts/flutter_tts.dart';
 
 void main() {
   runApp(const ArtisanAI());
@@ -1378,7 +1379,7 @@ Time Taken: $timeTaken hours
 
 Rules:
 - Consider material cost.
-- Consider labour cost.
+- Consider labour cost.firebase --version
 - Consider the time and effort of the artisan.
 - Recommend a reasonable profit.
 - Do not give an extremely high or unrealistic price.
@@ -1927,9 +1928,19 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final colorController = TextEditingController();
   final craftController = TextEditingController();
   final storyController = TextEditingController();
+  final FlutterTts flutterTts = FlutterTts();
   bool _isUploading = false;
   bool _listingConfirmed = false;
   String _confirmedDescription = '';
+
+  Future<void> _speakDescription() async {
+  final text = descriptionController.text.trim();
+
+  if (text.isEmpty) return;
+
+  await flutterTts.stop();
+  await flutterTts.speak(text);
+}
 
   Future<void> _pickImage() async {
     final XFile? image = await _picker.pickImage(
@@ -2138,6 +2149,136 @@ storyController.text =
 
 String selectedLanguage = 'English';
 
+String trResult(String key) {
+  final lang = selectedLanguage;
+
+  const uiTranslations = {
+    'English': {
+      'aiListing': 'AI Generated Listing',
+      'language': 'Language',
+      'productName': 'Product Name',
+      'category': 'Category',
+      'description': 'Description',
+      'materials': 'Materials',
+      'tags': 'Tags',
+      'confirm': 'Confirm Listing',
+    },
+    'Hindi': {
+      'aiListing': 'AI द्वारा बनाई गई लिस्टिंग',
+      'language': 'भाषा',
+      'productName': 'उत्पाद का नाम',
+      'category': 'श्रेणी',
+      'description': 'विवरण',
+      'materials': 'सामग्री',
+      'tags': 'टैग',
+      'confirm': 'लिस्टिंग की पुष्टि करें',
+    },
+    'Tamil': {
+  'aiListing': 'AI உருவாக்கிய பட்டியல்',
+  'language': 'மொழி',
+  'productName': 'தயாரிப்பு பெயர்',
+  'category': 'வகை',
+  'description': 'விளக்கம்',
+  'materials': 'பொருட்கள்',
+  'tags': 'குறிச்சொற்கள்',
+  'confirm': 'பட்டியலை உறுதிப்படுத்தவும்',
+},
+'Telugu': {
+  'aiListing': 'AI రూపొందించిన జాబితా',
+  'language': 'భాష',
+  'productName': 'ఉత్పత్తి పేరు',
+  'category': 'వర్గం',
+  'description': 'వివరణ',
+  'materials': 'పదార్థాలు',
+  'tags': 'ట్యాగ్‌లు',
+  'confirm': 'జాబితాను నిర్ధారించండి',
+},
+'Malayalam': {
+  'aiListing': 'AI തയ്യാറാക്കിയ ലിസ്റ്റിംഗ്',
+  'language': 'ഭാഷ',
+  'productName': 'ഉൽപ്പന്നത്തിന്റെ പേര്',
+  'category': 'വിഭാഗം',
+  'description': 'വിവരണം',
+  'materials': 'സാമഗ്രികൾ',
+  'tags': 'ടാഗുകൾ',
+  'confirm': 'ലിസ്റ്റിംഗ് സ്ഥിരീകരിക്കുക',
+},
+'Kannada': {
+  'aiListing': 'AI ರಚಿಸಿದ ಪಟ್ಟಿ',
+  'language': 'ಭಾಷೆ',
+  'productName': 'ಉತ್ಪನ್ನದ ಹೆಸರು',
+  'category': 'ವರ್ಗ',
+  'description': 'ವಿವರಣೆ',
+  'materials': 'ವಸ್ತುಗಳು',
+  'tags': 'ಟ್ಯಾಗ್‌ಗಳು',
+  'confirm': 'ಪಟ್ಟಿಯನ್ನು ದೃಢೀಕರಿಸಿ',
+},
+'Bengali': {
+  'aiListing': 'AI তৈরি করা তালিকা',
+  'language': 'ভাষা',
+  'productName': 'পণ্যের নাম',
+  'category': 'বিভাগ',
+  'description': 'বিবরণ',
+  'materials': 'উপকরণ',
+  'tags': 'ট্যাগ',
+  'confirm': 'তালিকা নিশ্চিত করুন',
+},
+'Marathi': {
+  'aiListing': 'AI द्वारे तयार केलेली सूची',
+  'language': 'भाषा',
+  'productName': 'उत्पादनाचे नाव',
+  'category': 'श्रेणी',
+  'description': 'वर्णन',
+  'materials': 'साहित्य',
+  'tags': 'टॅग',
+  'confirm': 'सूचीची पुष्टी करा',
+},
+'Gujarati': {
+  'aiListing': 'AI દ્વારા બનાવેલી લિસ્ટિંગ',
+  'language': 'ભાષા',
+  'productName': 'ઉત્પાદનનું નામ',
+  'category': 'શ્રેણી',
+  'description': 'વર્ણન',
+  'materials': 'સામગ્રી',
+  'tags': 'ટૅગ્સ',
+  'confirm': 'લિસ્ટિંગની પુષ્ટિ કરો',
+},
+'Punjabi': {
+  'aiListing': 'AI ਦੁਆਰਾ ਬਣਾਈ ਗਈ ਲਿਸਟਿੰਗ',
+  'language': 'ਭਾਸ਼ਾ',
+  'productName': 'ਉਤਪਾਦ ਦਾ ਨਾਮ',
+  'category': 'ਸ਼੍ਰੇਣੀ',
+  'description': 'ਵੇਰਵਾ',
+  'materials': 'ਸਮੱਗਰੀ',
+  'tags': 'ਟੈਗ',
+  'confirm': 'ਲਿਸਟਿੰਗ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ',
+},
+'Odia': {
+  'aiListing': 'AI ଦ୍ୱାରା ତିଆରି ତାଲିକା',
+  'language': 'ଭାଷା',
+  'productName': 'ଉତ୍ପାଦର ନାମ',
+  'category': 'ବର୍ଗ',
+  'description': 'ବର୍ଣ୍ଣନା',
+  'materials': 'ସାମଗ୍ରୀ',
+  'tags': 'ଟ୍ୟାଗ୍',
+  'confirm': 'ତାଲିକା ନିଶ୍ଚିତ କରନ୍ତୁ',
+},
+'Assamese': {
+  'aiListing': 'AI দ্বাৰা সৃষ্টি কৰা তালিকা',
+  'language': 'ভাষা',
+  'productName': 'উৎপাদনৰ নাম',
+  'category': 'শ্ৰেণী',
+  'description': 'বিৱৰণ',
+  'materials': 'সামগ্ৰী',
+  'tags': 'টেগ',
+  'confirm': 'তালিকা নিশ্চিত কৰক',
+},
+  };
+
+  return uiTranslations[lang]?[key] ??
+      uiTranslations['English']![key]!;
+}
+
 descriptionController.text =
     result['description'] ?? '';
 categoryController.text =
@@ -2155,84 +2296,197 @@ String currentDescription =
       builder: (sheetContext) {
         return StatefulBuilder(
           builder: (context, setModalState) {
-            Future<void> translateDescription(String language) async {
-              if (language == 'English') {
-                setModalState(() {
-                  currentDescription =
-                      result['description'] ?? 'No description generated';
-                });
-                return;
-              }
+Future<void> translateWholeResult(String language) async {
+  if (language == 'English') {
+    setModalState(() {
+      productNameController.text =
+          result['productName'] ?? '';
 
-              setModalState(() {
-                currentDescription = 'Translating...';
-              });
+      categoryController.text =
+          result['category'] ?? '';
 
-              try {
-                const apiKey =
-                    String.fromEnvironment('GEMINI_API_KEY');
+      descriptionController.text =
+          result['description'] ?? '';
 
-                final response = await http.post(
-                  Uri.parse(
-                    'https://generativelanguage.googleapis.com/v1beta/models/'
-                    'gemini-2.5-flash:generateContent',
-                  ),
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'x-goog-api-key': apiKey,
-                  },
-                  body: jsonEncode({
-                    'contents': [
-                      {
-                        'parts': [
-                          {
-                            'text': '''
-Translate the following product description into $language.
+      materialController.text =
+          (result['materials'] as List?)?.join(', ') ?? '';
 
-Rules:
-- Keep the meaning exactly the same.
-- Use simple and natural language.
-- Do not add new information.
-- Do not remove important information.
-- Keep it suitable for a product listing.
+      tagsController.text =
+          (result['tags'] as List?)?.join(', ') ?? '';
+    });
 
-Description:
-${result['description']}
+    return;
+  }
+
+  setModalState(() {
+    productNameController.text = 'Translating...';
+    categoryController.text = 'Translating...';
+    descriptionController.text = 'Translating...';
+    materialController.text = 'Translating...';
+    tagsController.text = 'Translating...';
+  });
+
+  try {
+    const apiKey =
+        String.fromEnvironment('GEMINI_API_KEY');
+
+    final models = [
+      'gemini-3.8-flash',
+      'gemini-3.7-flash',
+      'gemini-3.6-flash',
+      'gemini-3.5-flash',
+      'gemini-2.5-flash',
+    ];
+
+    http.Response? response;
+    String? lastError;
+
+    for (final model in models) {
+      try {
+        final candidateResponse = await http.post(
+          Uri.parse(
+            'https://generativelanguage.googleapis.com/v1beta/models/'
+            '$model:generateContent',
+          ),
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey,
+          },
+          body: jsonEncode({
+            'contents': [
+              {
+                'parts': [
+                  {
+                    'text': '''
+Translate the following artisan product listing into $language.
+
+Return ONLY valid JSON.
+
+Do not change the meaning.
+Do not add information.
+Do not remove information.
+
+Translate all text fields naturally and simply.
+
+Return exactly this structure:
+
+{
+  "productName": "...",
+  "category": "...",
+  "description": "...",
+  "materials": ["...", "..."],
+  "tags": ["...", "..."]
+}
+
+Original product listing:
+
+{
+  "productName": "${result['productName'] ?? ''}",
+  "category": "${result['category'] ?? ''}",
+  "description": "${result['description'] ?? ''}",
+  "materials": ${jsonEncode(result['materials'] ?? [])},
+  "tags": ${jsonEncode(result['tags'] ?? [])}
+}
 '''
-                          }
-                        ]
-                      }
-                    ]
-                  }),
-                );
-
-                if (response.statusCode != 200) {
-                  throw Exception(
-                    'Translation failed: ${response.statusCode}',
-                  );
-                }
-
-                final data = jsonDecode(response.body);
-
-                final translatedText =
-                    data['candidates'][0]['content']['parts'][0]['text'];
-
-                setModalState(() {
-                  currentDescription = translatedText.trim();
-                });
-              } catch (e) {
-                setModalState(() {
-                  currentDescription =
-                      result['description'] ?? 'Translation failed';
-                });
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Translation error: $e'),
-                  ),
-                );
+                  }
+                ]
               }
-            }
+            ]
+          }),
+        );
+
+        if (candidateResponse.statusCode == 200) {
+          response = candidateResponse;
+          break;
+        }
+
+        lastError =
+            '${candidateResponse.statusCode}: ${candidateResponse.body}';
+
+        if (candidateResponse.statusCode == 429 ||
+            candidateResponse.statusCode == 500 ||
+            candidateResponse.statusCode == 502 ||
+            candidateResponse.statusCode == 503 ||
+            candidateResponse.statusCode == 504) {
+          await Future.delayed(
+            const Duration(seconds: 1),
+          );
+          continue;
+        }
+
+        // Try next model for model-related errors
+        continue;
+      } catch (e) {
+        lastError = e.toString();
+      }
+    }
+
+    if (response == null) {
+      throw Exception(
+        'Translation failed. $lastError',
+      );
+    }
+
+    final data = jsonDecode(response.body);
+
+    String translatedText =
+        data['candidates'][0]['content']['parts'][0]['text'];
+
+    translatedText = translatedText.trim();
+
+    if (translatedText.startsWith('```')) {
+      translatedText = translatedText
+          .replaceFirst(RegExp(r'^```json\s*'), '')
+          .replaceFirst(RegExp(r'^```\s*'), '')
+          .replaceFirst(RegExp(r'\s*```$'), '');
+    }
+
+    final translated = jsonDecode(translatedText);
+
+    setModalState(() {
+      productNameController.text =
+          translated['productName'] ?? '';
+
+      categoryController.text =
+          translated['category'] ?? '';
+
+      descriptionController.text =
+          translated['description'] ?? '';
+
+      materialController.text =
+          (translated['materials'] as List?)?.join(', ') ?? '';
+
+      tagsController.text =
+          (translated['tags'] as List?)?.join(', ') ?? '';
+    });
+  } catch (e) {
+    setModalState(() {
+      productNameController.text =
+          result['productName'] ?? '';
+
+      categoryController.text =
+          result['category'] ?? '';
+
+      descriptionController.text =
+          result['description'] ?? '';
+
+      materialController.text =
+          (result['materials'] as List?)?.join(', ') ?? '';
+
+      tagsController.text =
+          (result['tags'] as List?)?.join(', ') ?? '';
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Translation error: $e',
+        ),
+        duration: const Duration(seconds: 5),
+      ),
+    );
+  }
+}
 
             return Container(
               padding: const EdgeInsets.all(24),
@@ -2246,7 +2500,7 @@ ${result['description']}
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
+                    Row(
                       children: [
                         Icon(
                           Icons.auto_awesome,
@@ -2254,7 +2508,7 @@ ${result['description']}
                         ),
                         SizedBox(width: 10),
                         Text(
-                          'AI Generated Listing',
+                          trResult('aiListing'),
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -2273,8 +2527,8 @@ ${result['description']}
                           color: Color(0xFF283D63),
                         ),
                         const SizedBox(width: 8),
-                        const Text(
-                          'Language:',
+                        Text(
+                          '${trResult('language')}:',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                           ),
@@ -2317,7 +2571,7 @@ ${result['description']}
                                 selectedLanguage = language;
                               });
 
-                              translateDescription(language);
+                              translateWholeResult(language);
                             },
                           ),
                         ),
@@ -2327,28 +2581,28 @@ ${result['description']}
                     const SizedBox(height: 24),
 
                     _editableResultField(
-                      title: 'Product Name',
+                      title: trResult('productName'),
                       controller: productNameController,
                     ),
 
                     _editableResultField(
-                      title: 'Category',
+                      title: trResult('category'),
                       controller: categoryController,
                     ),
 
                     _editableResultField(
-                      title: 'Description',
+                      title: trResult('description'),
                       controller: descriptionController,
                       maxLines: 4,
                     ),
 
                     _editableResultField(
-                      title: 'Materials',
+                      title: trResult('materials'),
                       controller: materialController,
                     ),
 
                     _editableResultField(
-                      title: 'Tags',
+                      title: trResult('tags'),
                       controller: tagsController,
                     ),
 
@@ -2366,7 +2620,7 @@ ${result['description']}
   Navigator.pop(sheetContext);
 },
                         icon: const Icon(Icons.check),
-                        label: const Text('Confirm Listing'),
+                        label: Text(trResult('confirm')),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF283D63),
                           foregroundColor: Colors.white,
@@ -2824,4 +3078,3 @@ class _HarmonyLogoPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-
