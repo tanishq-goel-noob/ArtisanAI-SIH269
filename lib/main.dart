@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
@@ -157,7 +159,6 @@ final Map<String, Map<String, String>> translations = {
     'artisanSub': 'Create listings, get pricing guidance and reach more buyers.',
     'buyer': "I'm a Buyer",
     'buyerSub': 'Discover authentic handmade products and connect directly with artisans.',
-    'goodMorning': 'Good morning! 👋',
     'today': 'What would you like to do today?',
     'newProduct': 'Create a Product Listing',
     'newProductSub': 'Upload one photo and let AI help you create the product details.',
@@ -175,7 +176,6 @@ final Map<String, Map<String, String>> translations = {
     'productTab': 'Products',
     'orderTab': 'Orders',
     'profile': 'Profile',
-    'buyerGreeting': 'Good morning! 👋',
     'buyerQuestion': 'Looking for something special?',
     'search': 'Search handmade products...',
     'categories': 'Explore Categories',
@@ -198,7 +198,6 @@ final Map<String, Map<String, String>> translations = {
     'artisanSub': 'प्रोडक्ट लिस्ट करें, कीमत की सलाह पाएं और खरीदारों तक पहुँचें।',
     'buyer': 'मैं Buyer हूँ',
     'buyerSub': 'हाथ से बने असली उत्पाद खोजें और सीधे Artisans से जुड़ें।',
-    'goodMorning': 'सुप्रभात! 👋',
     'today': 'आज आप क्या करना चाहते हैं?',
     'newProduct': 'Product Listing बनाएं',
     'newProductSub': 'एक फोटो अपलोड करें और AI की मदद से प्रोडक्ट की जानकारी तैयार करें।',
@@ -216,7 +215,6 @@ final Map<String, Map<String, String>> translations = {
     'productTab': 'Products',
     'orderTab': 'Orders',
     'profile': 'Profile',
-    'buyerGreeting': 'सुप्रभात! 👋',
     'buyerQuestion': 'कुछ खास ढूंढ रहे हैं?',
     'search': 'Handmade products खोजें...',
     'categories': 'Categories देखें',
@@ -239,7 +237,6 @@ final Map<String, Map<String, String>> translations = {
     'artisanSub': 'தயாரிப்புகளை பட்டியலிட்டு வாங்குபவர்களை சென்றடையுங்கள்.',
     'buyer': 'நான் வாங்குபவர்',
     'buyerSub': 'கைவினைப் பொருட்களை கண்டுபிடித்து கைவினைஞர்களுடன் இணையுங்கள்.',
-    'goodMorning': 'காலை வணக்கம்! 👋',
     'today': 'இன்று என்ன செய்ய விரும்புகிறீர்கள்?',
     'newProduct': 'தயாரிப்பு பட்டியல் உருவாக்கவும்',
     'newProductSub': 'ஒரு புகைப்படத்தை பதிவேற்றி AI மூலம் விவரங்களை உருவாக்குங்கள்.',
@@ -257,7 +254,6 @@ final Map<String, Map<String, String>> translations = {
     'productTab': 'Products',
     'orderTab': 'Orders',
     'profile': 'Profile',
-    'buyerGreeting': 'காலை வணக்கம்! 👋',
     'buyerQuestion': 'ஏதாவது சிறப்பானதை தேடுகிறீர்களா?',
     'search': 'கைவினைப் பொருட்களை தேடுங்கள்...',
     'categories': 'வகைகளை ஆராயுங்கள்',
@@ -280,7 +276,6 @@ final Map<String, Map<String, String>> translations = {
     'artisanSub': 'ఉత్పత్తులను జాబితా చేసి మరింత మంది కొనుగోలుదారులను చేరుకోండి.',
     'buyer': 'నేను కొనుగోలుదారుని',
     'buyerSub': 'చేతితో తయారు చేసిన ఉత్పత్తులను కనుగొని కళాకారులతో నేరుగా కనెక్ట్ అవ్వండి.',
-    'goodMorning': 'శుభోదయం! 👋',
     'today': 'ఈ రోజు మీరు ఏమి చేయాలనుకుంటున్నారు?',
     'newProduct': 'ఉత్పత్తి జాబితాను రూపొందించండి',
     'newProductSub': 'ఒక ఫోటోను అప్‌లోడ్ చేసి AI సహాయంతో వివరాలను రూపొందించండి.',
@@ -298,7 +293,6 @@ final Map<String, Map<String, String>> translations = {
     'productTab': 'Products',
     'orderTab': 'Orders',
     'profile': 'Profile',
-    'buyerGreeting': 'శుభోదయం! 👋',
     'buyerQuestion': 'ఏదైనా ప్రత్యేకమైనది వెతుకుతున్నారా?',
     'search': 'చేతితో తయారు చేసిన ఉత్పత్తులను వెతకండి...',
     'categories': 'వర్గాలను చూడండి',
@@ -321,7 +315,6 @@ final Map<String, Map<String, String>> translations = {
     'artisanSub': 'ഉൽപ്പന്നങ്ങൾ ലിസ്റ്റ് ചെയ്ത് കൂടുതൽ വാങ്ങുന്നവരിലേക്ക് എത്തുക.',
     'buyer': 'ഞാൻ ഒരു വാങ്ങുന്നയാളാണ്',
     'buyerSub': 'കൈകൊണ്ട് നിർമ്മിച്ച ഉൽപ്പന്നങ്ങൾ കണ്ടെത്തി കരകൗശല വിദഗ്ധരുമായി ബന്ധപ്പെടുക.',
-    'goodMorning': 'സുപ്രഭാതം! 👋',
     'today': 'ഇന്ന് എന്താണ് ചെയ്യേണ്ടത്?',
     'newProduct': 'ഉൽപ്പന്ന ലിസ്റ്റിംഗ് തയ്യാറാക്കുക',
     'newProductSub': 'ഒരു ഫോട്ടോ അപ്‌ലോഡ് ചെയ്ത് AI സഹായത്തോടെ വിവരങ്ങൾ തയ്യാറാക്കുക.',
@@ -339,7 +332,6 @@ final Map<String, Map<String, String>> translations = {
     'productTab': 'Products',
     'orderTab': 'Orders',
     'profile': 'Profile',
-    'buyerGreeting': 'സുപ്രഭാതം! 👋',
     'buyerQuestion': 'പ്രത്യേകമായി എന്തെങ്കിലും അന്വേഷിക്കുകയാണോ?',
     'search': 'കൈകൊണ്ട് നിർമ്മിച്ച ഉൽപ്പന്നങ്ങൾ തിരയുക...',
     'categories': 'വിഭാഗങ്ങൾ',
@@ -357,6 +349,89 @@ String tr(String language, String key) {
   return translations[language]?[key] ??
       translations['English']![key] ??
       key;
+}
+
+/// Computes a greeting from the user's LOCAL time at the moment it is
+/// called — the Dart equivalent of JavaScript's `new Date()`. On Flutter
+/// web this reads the browser's own clock and timezone (no fixed
+/// timezone, no cached or build-time value).
+///
+/// Rules:
+/// - 5:00 AM – 11:59 AM → "Good Morning 🌅"
+/// - 12:00 PM – 4:59 PM → "Good Afternoon ☀️"
+/// - 5:00 PM – 8:59 PM  → "Good Evening 🌆"
+/// - 9:00 PM – 4:59 AM  → "Good Night 🌙"
+String computeGreeting({DateTime? now}) {
+  // IMPORTANT: DateTime.now() uses the browser/device's LOCAL time.
+  // No fixed timezone or server time is used.
+  final time = now ?? DateTime.now();
+  final minuteOfDay = time.hour * 60 + time.minute;
+
+  if (minuteOfDay >= 5 * 60 && minuteOfDay < 12 * 60) {
+    return 'Good Morning 🌅';
+  } else if (minuteOfDay >= 12 * 60 && minuteOfDay < 17 * 60) {
+    return 'Good Afternoon ☀️';
+  } else if (minuteOfDay >= 17 * 60 && minuteOfDay < 21 * 60) {
+    return 'Good Evening 🌆';
+  } else {
+    return 'Good Night 🌙';
+  }
+}
+
+/// Greeting that follows the browser/device local clock.
+/// It updates when the greeting period changes and also refreshes when
+/// the browser/app becomes active again.
+class TimeGreetingText extends StatefulWidget {
+  final TextStyle? style;
+
+  const TimeGreetingText({super.key, this.style});
+
+  @override
+  State<TimeGreetingText> createState() => _TimeGreetingTextState();
+}
+
+class _TimeGreetingTextState extends State<TimeGreetingText>
+    with WidgetsBindingObserver {
+  late String _greeting;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _greeting = computeGreeting();
+
+    // Check regularly so the greeting changes even if the page stays open.
+    _timer = Timer.periodic(const Duration(seconds: 30), (_) => _refreshGreeting());
+  }
+
+  void _refreshGreeting() {
+    if (!mounted) return;
+    final greeting = computeGreeting();
+    if (greeting != _greeting) {
+      setState(() => _greeting = greeting);
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // When returning to the browser/app, immediately recalculate the greeting.
+    if (state == AppLifecycleState.resumed) {
+      _refreshGreeting();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(_greeting, style: widget.style);
+  }
 }
 
 class LanguageButton extends StatelessWidget {
@@ -763,8 +838,7 @@ class _ArtisanDashboardState extends State<ArtisanDashboard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              tr(l, 'goodMorning'),
+            TimeGreetingText(
               style: const TextStyle(
                 fontSize: 16,
                 color: Colors.black54,
@@ -1121,8 +1195,7 @@ class BuyerDashboard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              tr(l, 'buyerGreeting'),
+            TimeGreetingText(
               style: const TextStyle(color: Colors.black54),
             ),
             const SizedBox(height: 5),
