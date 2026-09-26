@@ -2005,6 +2005,384 @@ class _AddProductScreenState extends State<AddProductScreen> {
   bool _isUploading = false;
   bool _listingConfirmed = false;
   String _confirmedDescription = '';
+  String selectedListingLanguage = 'English';
+
+
+  final List<Map<String, dynamic>> savedProducts = [];
+
+  void _editProduct(int index) {
+  final product = savedProducts[index];
+
+  final editNameController = TextEditingController(
+    text: product['productName'] ?? '',
+  );
+
+  final editCategoryController = TextEditingController(
+    text: product['category'] ?? '',
+  );
+
+  final editDescriptionController = TextEditingController(
+    text: product['description'] ?? '',
+  );
+
+  final editMaterialsController = TextEditingController(
+    text: product['materials'] ?? '',
+  );
+
+  final editTagsController = TextEditingController(
+    text: product['tags'] ?? '',
+  );
+
+  showDialog(
+    context: context,
+    builder: (dialogContext) {
+      return AlertDialog(
+        title: const Text('Edit Product'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: editNameController,
+                decoration: const InputDecoration(
+                  labelText: 'Product Name',
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              TextField(
+                controller: editCategoryController,
+                decoration: const InputDecoration(
+                  labelText: 'Category',
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              TextField(
+                controller: editDescriptionController,
+                maxLines: 4,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              TextField(
+                controller: editMaterialsController,
+                decoration: const InputDecoration(
+                  labelText: 'Materials',
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              TextField(
+                controller: editTagsController,
+                decoration: const InputDecoration(
+                  labelText: 'Tags',
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+            },
+            child: const Text('Cancel'),
+          ),
+
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                savedProducts[index]['productName'] =
+                    editNameController.text;
+
+                savedProducts[index]['category'] =
+                    editCategoryController.text;
+
+                savedProducts[index]['description'] =
+                    editDescriptionController.text;
+
+                savedProducts[index]['materials'] =
+                    editMaterialsController.text;
+
+                savedProducts[index]['tags'] =
+                    editTagsController.text;
+              });
+
+              Navigator.pop(dialogContext);
+
+              Navigator.pop(context);
+              _showMyProducts();
+            },
+            child: const Text('Save Changes'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+void _showMyProducts() {
+  showDialog(
+    context: context,
+    builder: (dialogContext) {
+      return AlertDialog(
+        title: const Text('My Products'),
+
+        content: savedProducts.isEmpty
+            ? const Text('No products saved yet.')
+            : SizedBox(
+                width: double.maxFinite,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: savedProducts.length,
+                  itemBuilder: (context, index) {
+                    final product = savedProducts[index];
+
+                    final int stock =
+                        (product['stock'] ?? 0) is int
+                            ? product['stock'] ?? 0
+                            : int.tryParse(
+                                  product['stock'].toString(),
+                                ) ??
+                                0;
+
+                    final int lowStockThreshold =
+                        product['lowStockThreshold'] ?? 5;
+
+                    final bool isOutOfStock = stock == 0;
+                    final bool isLowStock =
+                        stock > 0 && stock <= lowStockThreshold;
+
+                    return Column(
+                      children: [
+                        ListTile(
+                          leading: const Icon(
+                            Icons.shopping_bag,
+                          ),
+
+                          title: Text(
+                            product['productName'] ??
+                                'Unnamed Product',
+                          ),
+
+                          subtitle: Text(
+                            '${product['category'] ?? ''}\n'
+                            'Stock: $stock',
+                          ),
+
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // EDIT
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.edit_outlined,
+                                ),
+                                tooltip: 'Edit Product',
+                                onPressed: () {
+                                  Navigator.pop(dialogContext);
+                                  _editProduct(index);
+                                },
+                              ),
+
+                              // DELETE
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                ),
+                                tooltip: 'Delete Product',
+                                onPressed: () async {
+                                  final confirmDelete =
+                                      await showDialog<bool>(
+                                    context: context,
+                                    builder:
+                                        (deleteContext) {
+                                      return AlertDialog(
+                                        title: const Text(
+                                          'Delete Product?',
+                                        ),
+                                        content: Text(
+                                          'Are you sure you want to delete '
+                                          '"${product['productName']}"?',
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(
+                                                deleteContext,
+                                                false,
+                                              );
+                                            },
+                                            child: const Text(
+                                              'Cancel',
+                                            ),
+                                          ),
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              Navigator.pop(
+                                                deleteContext,
+                                                true,
+                                              );
+                                            },
+                                            child: const Text(
+                                              'Delete',
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+
+                                  if (confirmDelete == true) {
+                                    setState(() {
+                                      savedProducts.removeAt(
+                                        index,
+                                      );
+                                    });
+
+                                    Navigator.pop(dialogContext);
+                                    _showMyProducts();
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        if (isOutOfStock)
+                        const Text(
+                          '⚠️ Out of Stock',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                        else if (isLowStock)
+                        Text(
+                          '⚠️ Low Stock',
+                          style: TextStyle(
+                            color: Colors.orange.shade800,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      const SizedBox(height: 6),
+
+                        // STOCK MANAGEMENT
+                        Row(
+                          mainAxisAlignment:
+                              MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              'Stock:',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+
+                            const SizedBox(width: 8),
+
+                            // MINUS
+                            IconButton(
+                              icon: const Icon(
+                                Icons.remove_circle_outline,
+                              ),
+                              onPressed: stock > 0
+                                  ? () {
+                                      setState(() {
+                                        savedProducts[index]
+                                            ['stock'] =
+                                            stock - 1;
+                                      });
+
+                                      Navigator.pop(
+                                        dialogContext,
+                                      );
+                                      _showMyProducts();
+                                    }
+                                  : null,
+                            ),
+
+                            // DIRECT VALUE INPUT
+                            SizedBox(
+                              width: 70,
+                              child: TextFormField(
+                                initialValue: stock.toString(),
+                                textAlign: TextAlign.center,
+                                keyboardType:
+                                    TextInputType.number,
+                                decoration:
+                                    const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                ),
+                                onFieldSubmitted: (value) {
+                                  final newStock =
+                                      int.tryParse(value);
+
+                                  if (newStock != null &&
+                                      newStock >= 0) {
+                                    setState(() {
+                                      savedProducts[index]
+                                          ['stock'] =
+                                          newStock;
+                                    });
+
+                                    Navigator.pop(
+                                      dialogContext,
+                                    );
+                                    _showMyProducts();
+                                  }
+                                },
+                              ),
+                            ),
+
+                            // PLUS
+                            IconButton(
+                              icon: const Icon(
+                                Icons.add_circle_outline,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  savedProducts[index]
+                                      ['stock'] =
+                                      stock + 1;
+                                });
+
+                                Navigator.pop(
+                                  dialogContext,
+                                );
+                                _showMyProducts();
+                              },
+                            ),
+                          ],
+                        ),
+
+                        const Divider(),
+                      ],
+                    );
+                  },
+                ),
+              ),
+
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+            },
+            child: const Text('Close'),
+          ),
+        ],
+      );
+    },
+  );
+}
 
   Future<void> _speakDescription() async {
   final text = descriptionController.text.trim();
@@ -2121,11 +2499,12 @@ Return ONLY valid JSON in this exact format:
 }
 
 Important:
-- Use very simple and easy English.
+- Generate the entire product listing in $selectedListingLanguage.
+- Use very simple and easy language suitable for normal buyers.
 - Write the description so a normal buyer can understand it easily.
 - Use short and clear sentences.
 - Keep the description natural and friendly.
-- Avoid difficult, fancy, technical, or uncommon English words.
+- Avoid difficult, fancy, technical, or uncommon words in the selected language.
 - Keep the description around 2-4 short sentences.
 - Do not claim a material with certainty if it cannot be identified from the image.
 - For uncertain materials, use wording like "Possible material: ...".
@@ -2220,7 +2599,7 @@ craftController.text =
 storyController.text =
     result['description'] ?? '';
 
-String selectedLanguage = 'English';
+String selectedLanguage = selectedListingLanguage;
 
 String trResult(String key) {
   final lang = selectedLanguage;
@@ -2369,197 +2748,6 @@ String currentDescription =
       builder: (sheetContext) {
         return StatefulBuilder(
           builder: (context, setModalState) {
-Future<void> translateWholeResult(String language) async {
-  if (language == 'English') {
-    setModalState(() {
-      productNameController.text =
-          result['productName'] ?? '';
-
-      categoryController.text =
-          result['category'] ?? '';
-
-      descriptionController.text =
-          result['description'] ?? '';
-
-      materialController.text =
-          (result['materials'] as List?)?.join(', ') ?? '';
-
-      tagsController.text =
-          (result['tags'] as List?)?.join(', ') ?? '';
-    });
-
-    return;
-  }
-
-  setModalState(() {
-    productNameController.text = 'Translating...';
-    categoryController.text = 'Translating...';
-    descriptionController.text = 'Translating...';
-    materialController.text = 'Translating...';
-    tagsController.text = 'Translating...';
-  });
-
-  try {
-    const apiKey =
-        String.fromEnvironment('GEMINI_API_KEY');
-
-    final models = [
-      'gemini-3.8-flash',
-      'gemini-3.7-flash',
-      'gemini-3.6-flash',
-      'gemini-3.5-flash',
-      'gemini-2.5-flash',
-    ];
-
-    http.Response? response;
-    String? lastError;
-
-    for (final model in models) {
-      try {
-        final candidateResponse = await http.post(
-          Uri.parse(
-            'https://generativelanguage.googleapis.com/v1beta/models/'
-            '$model:generateContent',
-          ),
-          headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': apiKey,
-          },
-          body: jsonEncode({
-            'contents': [
-              {
-                'parts': [
-                  {
-                    'text': '''
-Translate the following artisan product listing into $language.
-
-Return ONLY valid JSON.
-
-Do not change the meaning.
-Do not add information.
-Do not remove information.
-
-Translate all text fields naturally and simply.
-
-Return exactly this structure:
-
-{
-  "productName": "...",
-  "category": "...",
-  "description": "...",
-  "materials": ["...", "..."],
-  "tags": ["...", "..."]
-}
-
-Original product listing:
-
-{
-  "productName": "${result['productName'] ?? ''}",
-  "category": "${result['category'] ?? ''}",
-  "description": "${result['description'] ?? ''}",
-  "materials": ${jsonEncode(result['materials'] ?? [])},
-  "tags": ${jsonEncode(result['tags'] ?? [])}
-}
-'''
-                  }
-                ]
-              }
-            ]
-          }),
-        );
-
-        if (candidateResponse.statusCode == 200) {
-          response = candidateResponse;
-          break;
-        }
-
-        lastError =
-            '${candidateResponse.statusCode}: ${candidateResponse.body}';
-
-        if (candidateResponse.statusCode == 429 ||
-            candidateResponse.statusCode == 500 ||
-            candidateResponse.statusCode == 502 ||
-            candidateResponse.statusCode == 503 ||
-            candidateResponse.statusCode == 504) {
-          await Future.delayed(
-            const Duration(seconds: 1),
-          );
-          continue;
-        }
-
-        // Try next model for model-related errors
-        continue;
-      } catch (e) {
-        lastError = e.toString();
-      }
-    }
-
-    if (response == null) {
-      throw Exception(
-        'Translation failed. $lastError',
-      );
-    }
-
-    final data = jsonDecode(response.body);
-
-    String translatedText =
-        data['candidates'][0]['content']['parts'][0]['text'];
-
-    translatedText = translatedText.trim();
-
-    if (translatedText.startsWith('```')) {
-      translatedText = translatedText
-          .replaceFirst(RegExp(r'^```json\s*'), '')
-          .replaceFirst(RegExp(r'^```\s*'), '')
-          .replaceFirst(RegExp(r'\s*```$'), '');
-    }
-
-    final translated = jsonDecode(translatedText);
-
-    setModalState(() {
-      productNameController.text =
-          translated['productName'] ?? '';
-
-      categoryController.text =
-          translated['category'] ?? '';
-
-      descriptionController.text =
-          translated['description'] ?? '';
-
-      materialController.text =
-          (translated['materials'] as List?)?.join(', ') ?? '';
-
-      tagsController.text =
-          (translated['tags'] as List?)?.join(', ') ?? '';
-    });
-  } catch (e) {
-    setModalState(() {
-      productNameController.text =
-          result['productName'] ?? '';
-
-      categoryController.text =
-          result['category'] ?? '';
-
-      descriptionController.text =
-          result['description'] ?? '';
-
-      materialController.text =
-          (result['materials'] as List?)?.join(', ') ?? '';
-
-      tagsController.text =
-          (result['tags'] as List?)?.join(', ') ?? '';
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Translation error: $e',
-        ),
-        duration: const Duration(seconds: 5),
-      ),
-    );
-  }
-}
 
             return Container(
               padding: const EdgeInsets.all(24),
@@ -2585,67 +2773,6 @@ Original product listing:
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Language selector
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.language,
-                          color: Color(0xFF283D63),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '${trResult('language')}:',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-
-                        Expanded(
-                          child: DropdownButtonFormField<String>(
-                            value: selectedLanguage,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                            ),
-                            items: const [
-                              'English',
-                              'Hindi',
-                              'Tamil',
-                              'Telugu',
-                              'Malayalam',
-                              'Kannada',
-                              'Bengali',
-                              'Marathi',
-                              'Gujarati',
-                              'Punjabi',
-                              'Odia',
-                              'Assamese',
-                            ].map((language) {
-                              return DropdownMenuItem(
-                                value: language,
-                                child: Text(language),
-                              );
-                            }).toList(),
-                            onChanged: (language) {
-                              if (language == null) return;
-
-                              setModalState(() {
-                                selectedLanguage = language;
-                              });
-
-                              translateWholeResult(language);
-                            },
                           ),
                         ),
                       ],
@@ -2684,14 +2811,26 @@ Original product listing:
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            _confirmedDescription = descriptionController.text;
-                            _listingConfirmed = true;
-                          });
+                      onPressed: () {
+                      setState(() {
+                        savedProducts.add({
+                          'productName': productNameController.text,
+                          'category': categoryController.text,
+                          'description': descriptionController.text,
+                          'materials': materialController.text,
+                          'tags': tagsController.text,
+                          'image': _selectedImage,
+                          'language': selectedListingLanguage,
+                          'stock': 0,
+                          'lowStockThreshold': 5,
+                        });
 
-  Navigator.pop(sheetContext);
-},
+                        _confirmedDescription = descriptionController.text;
+                        _listingConfirmed = true;
+                      });
+
+                      Navigator.pop(sheetContext);
+                    },
                         icon: const Icon(Icons.check),
                         label: Text(trResult('confirm')),
                         style: ElevatedButton.styleFrom(
@@ -2936,6 +3075,44 @@ Original product listing:
 
             const SizedBox(height: 24),
 
+            const SizedBox(height: 16),
+
+            DropdownButtonFormField<String>(
+              value: selectedListingLanguage,
+              decoration: const InputDecoration(
+                labelText: 'Listing Language',
+                prefixIcon: Icon(Icons.language),
+              ),
+              items: const [
+                'English',
+                'Hindi',
+                'Tamil',
+                'Telugu',
+                'Malayalam',
+                'Kannada',
+                'Bengali',
+                'Marathi',
+                'Gujarati',
+                'Punjabi',
+                'Odia',
+                'Assamese',
+              ].map((language) {
+                return DropdownMenuItem<String>(
+                  value: language,
+                  child: Text(language),
+                );
+              }).toList(),
+              onChanged: (language) {
+                if (language == null) return;
+
+                setState(() {
+                  selectedListingLanguage = language;
+                });
+              },
+            ),
+
+            const SizedBox(height: 16),
+
             // AI GENERATE BUTTON
             SizedBox(
               width: double.infinity,
@@ -2980,6 +3157,15 @@ Original product listing:
 
             const SizedBox(height: 20),
 
+            const SizedBox(height: 16),
+
+            ElevatedButton.icon(
+              onPressed: () {
+                _showMyProducts();
+              },
+              icon: const Icon(Icons.inventory_2),
+              label: const Text('My Products'),
+            ),
             // AI INFO
             Container(
               padding: const EdgeInsets.all(18),
